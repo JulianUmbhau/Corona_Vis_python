@@ -50,11 +50,34 @@ confirmed = pd.read_csv(url_confirmed)
 # %%
 deaths_clean = deaths.drop(columns=["Province/State","Lat", "Long"])
 
+import matplotlib.pyplot as plt
+
+#deaths_clean.reset_index().rename(columns={"index":"ID"})
+
+deaths_clean.melt(id_vars=["Country/Region"], var_name="Date")
+
+
+
+deaths_clean[["Country/Region"]]
+
+deaths_clean.columns()
+
+deaths_clean["Angola"].plot()
+
+deaths_clean.plot()
+
+deaths_clean = deaths_clean.set_index("Country/Region")
+
 deaths_clean=deaths_clean.rename(columns = {'Country/Region':'country'})
 
-deaths_clean = deaths_clean.groupby(["country"]).sum()
+deaths_clean = deaths_clean.T
 
-type(deaths_clean)
+deaths_clean.reset_index()
+
+deaths_clean = pd.DataFrame(deaths_clean.groupby(["country"]).sum())
+
+
+deaths_clean["country"].duplicated()
 
 deaths_clean = deaths_clean.drop_duplicates(subset=['country'])
 
@@ -71,7 +94,8 @@ df2.columns
 # %%
 df2_test = df2[df2["Country/Region"] == "Albania"]
 df2_test = df2_test.drop(columns=["Country/Region"])
-df2_test = df2_test.astype(str)
+#df2_test = df2_test.astype(str)
+
 # %%
 st.dataframe(df2_test.head())
 st.header("Test timeline")
