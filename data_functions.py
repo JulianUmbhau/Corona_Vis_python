@@ -50,24 +50,35 @@ confirmed = pd.read_csv(url_confirmed)
 # %%
 deaths_clean = deaths.drop(columns=["Province/State","Lat", "Long"])
 
-deaths_clean = deaths_clean.drop_duplicates(subset=['Country/Region'])
+deaths_clean=deaths_clean.rename(columns = {'Country/Region':'country'})
+
+deaths_clean = deaths_clean.groupby(["country"]).sum()
+
+type(deaths_clean)
+
+deaths_clean = deaths_clean.drop_duplicates(subset=['country'])
 
 deaths_long = pd.wide_to_long(deaths_clean, stubnames="", i="Country/Region", j="Date")
 df2=pd.melt(deaths_clean,id_vars=['Country/Region'], var_name='Date', value_name='Deaths')
 
+df2.columns
 
-df2["Date"] = pd.to_datetime(df2["Date"])
+
+#df2["Date"] = pd.to_datetime(df2["Date"])
 
 # @st.cache used before function definition for caching of returned data
 
-
 # %%
-st.dataframe(deaths_clean.head())
+df2_test = df2[df2["Country/Region"] == "Albania"]
+df2_test = df2_test.drop(columns=["Country/Region"])
+df2_test = df2_test.astype(str)
+# %%
+st.dataframe(df2_test.head())
 st.header("Test timeline")
 
 #df2["Deaths"] = int(df2["Deaths"])
 
-st.line_chart(df2)
+#st.line_chart(df2_test)
 
 # add together duplicatd countries
 # deaths_clean["Country/Region"][deaths_clean["Country/Region"].duplicated()].unique()
