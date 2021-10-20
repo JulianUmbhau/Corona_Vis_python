@@ -41,65 +41,47 @@ df['Yearly Change'] = df['Yearly Change'].str.replace('%','')
 df['Urban Pop %'] = df['Urban Pop %'].str.replace('%','')
 df['World Share'] = df['World Share'].str.replace('%','')
 
+df.rename({"Country(or dependency)":"Country", "Population (2020)":"Population"})
+
+df = df.drop(df.columns[[0, 1, 3]], axis=1)  # df.columns is zero-based pd.Index
+
+df.reset_index(drop=True,inplace=True)
+
 url_deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 url_confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
 
 deaths = pd.read_csv(url_deaths)
 confirmed = pd.read_csv(url_confirmed)
 
+
+df
+
 # %%
 deaths_clean = deaths.drop(columns=["Province/State","Lat", "Long"])
+
+deaths_clean=deaths_clean.rename(columns = {'Country/Region':'Country'})
 
 import matplotlib.pyplot as plt
 
 #deaths_clean.reset_index().rename(columns={"index":"ID"})
 
-deaths_clean.melt(id_vars=["Country/Region"], var_name="Date")
+deaths_clean = deaths_clean.melt(id_vars=["Country"], var_name="Date")
+
+Angola = deaths_clean[deaths_clean["Country"] == "Angola"]
 
 
 
-deaths_clean[["Country/Region"]]
-
-deaths_clean.columns()
-
-deaths_clean["Angola"].plot()
-
-deaths_clean.plot()
-
-deaths_clean = deaths_clean.set_index("Country/Region")
-
-deaths_clean=deaths_clean.rename(columns = {'Country/Region':'country'})
-
-deaths_clean = deaths_clean.T
-
-deaths_clean.reset_index()
-
-deaths_clean = pd.DataFrame(deaths_clean.groupby(["country"]).sum())
-
-
-deaths_clean["country"].duplicated()
-
-deaths_clean = deaths_clean.drop_duplicates(subset=['country'])
-
-deaths_long = pd.wide_to_long(deaths_clean, stubnames="", i="Country/Region", j="Date")
-df2=pd.melt(deaths_clean,id_vars=['Country/Region'], var_name='Date', value_name='Deaths')
-
-df2.columns
-
-
-#df2["Date"] = pd.to_datetime(df2["Date"])
 
 # @st.cache used before function definition for caching of returned data
 
 # %%
-df2_test = df2[df2["Country/Region"] == "Albania"]
-df2_test = df2_test.drop(columns=["Country/Region"])
-#df2_test = df2_test.astype(str)
 
 # %%
-st.dataframe(df2_test.head())
+st.dataframe(Angola.head())
 st.header("Test timeline")
+st.line_chart(Angola)
 
+Angola.plot()
 #df2["Deaths"] = int(df2["Deaths"])
 
 #st.line_chart(df2_test)

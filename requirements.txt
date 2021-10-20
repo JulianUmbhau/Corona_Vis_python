@@ -1,6 +1,7 @@
 pandas
 numpy
-streamlit
+streamlit == 0.75
 requests
 beautifulsoup4
 plotly
+matplotlib
