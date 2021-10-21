@@ -1,11 +1,12 @@
 # %%
 import pandas as pd
-from pandas.core.algorithms import duplicated
+from pandas.core.algorithms import duplicated, isin
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import streamlit as st
 import plotly.express as px
+import matplotlib.pyplot as plt
 
 # %%
 
@@ -41,11 +42,23 @@ df['Yearly Change'] = df['Yearly Change'].str.replace('%','')
 df['Urban Pop %'] = df['Urban Pop %'].str.replace('%','')
 df['World Share'] = df['World Share'].str.replace('%','')
 
-df.rename({"Country(or dependency)":"Country", "Population (2020)":"Population"})
+df = df.rename(columns={df.columns[1]:"Country", df.columns[2]:"Population"})
 
-df = df.drop(df.columns[[0, 1, 3]], axis=1)  # df.columns is zero-based pd.Index
+df = df.drop(df.columns[[0]], axis=1)  # df.columns is zero-based pd.Index
 
 df.reset_index(drop=True,inplace=True)
+
+
+# %%
+
+def clean_data(data, value):
+    data_clean = data.drop(columns=["Province/State","Lat", "Long"])
+    data_clean = data_clean.rename(columns = {'Country/Region':'Country'})
+    data_clean = data_clean.melt(id_vars=["Country"], var_name="Date", value_name=value)
+    data_clean["Date"] = pd.to_datetime(data_clean["Date"], errors="coerce")
+    data_clean = data_clean.groupby(["Country", "Date"]).sum().reset_index()
+    return(data_clean)
+
 
 url_deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 url_confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
@@ -53,35 +66,51 @@ url_confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/maste
 deaths = pd.read_csv(url_deaths)
 confirmed = pd.read_csv(url_confirmed)
 
+deaths_clean = clean_data(deaths, "Deaths")
+confirmed_clean = clean_data(confirmed, "Confirmed")
 
-df
+confirmed_clean = confirmed_clean.drop(columns=["Date", "Country"])
+confirmed_deaths_clean = deaths_clean.join(confirmed_clean)
 
-# %%
-deaths_clean = deaths.drop(columns=["Province/State","Lat", "Long"])
+confirmed_deaths_clean_population = pd.merge(confirmed_deaths_clean, df, on=["Country"])
 
-deaths_clean=deaths_clean.rename(columns = {'Country/Region':'Country'})
-
-import matplotlib.pyplot as plt
-
-#deaths_clean.reset_index().rename(columns={"index":"ID"})
-
-deaths_clean = deaths_clean.melt(id_vars=["Country"], var_name="Date")
-
-Angola = deaths_clean[deaths_clean["Country"] == "Angola"]
-
-
-
+# TODO Datamanipulation: change pr day for both measures, rolling average, percentage of population, cases per 100.000 pop,  
 
 # @st.cache used before function definition for caching of returned data
 
 # %%
+# TODO: Map visualization, user feedback, forecasting, 
+
 
 # %%
-st.dataframe(Angola.head())
-st.header("Test timeline")
-st.line_chart(Angola)
+st.header("Choose Countries")
 
-Angola.plot()
+#countries_chosen_list = st.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+
+
+
+
+#countries_chosen_df["ID"] = 
+
+# countries_chosen_df["Date"] = pd.to_datetime(countries_chosen_df["Date"])
+
+#countries_chosen_df = countries_chosen_df.set_index("Date")
+col1, col2 = st.beta_columns(2)
+
+col1.header("Choose country")
+countries_chosen_list = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_list)]
+countries_chosen_df = countries_chosen_df.drop(columns=["Country","Confirmed"])
+countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
+
+col2.header("Test")
+c1 = px.line(countries_chosen_df, x="Date", y="Deaths", title='Test')
+col2.plotly_chart(c1)
+
+
+st.plotly_chart(c1)
+
+
 #df2["Deaths"] = int(df2["Deaths"])
 
 #st.line_chart(df2_test)

@@ -1,6 +1,6 @@
 pandas
 numpy
-streamlit == 0.75
+streamlit
 requests
 beautifulsoup4
 plotly
