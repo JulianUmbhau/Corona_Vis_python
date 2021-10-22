@@ -54,6 +54,9 @@ df.reset_index(drop=True,inplace=True)
 def clean_data(data, value):
     data_clean = data.drop(columns=["Province/State","Lat", "Long"])
     data_clean = data_clean.rename(columns = {'Country/Region':'Country'})
+    data_clean["Country"] = data_clean["Country"].str.replace("US", "United States")
+    data_clean["Country"] = data_clean["Country"].str.replace("Korea, South", "South Korea")
+    
     data_clean = data_clean.melt(id_vars=["Country"], var_name="Date", value_name=value)
     data_clean["Date"] = pd.to_datetime(data_clean["Date"], errors="coerce")
     data_clean = data_clean.groupby(["Country", "Date"]).sum().reset_index()
@@ -74,23 +77,38 @@ confirmed_deaths_clean = deaths_clean.join(confirmed_clean)
 
 confirmed_deaths_clean_population = pd.merge(confirmed_deaths_clean, df, on=["Country"])
 
+#confirmed_deaths_clean_population["Delta_confirmed"] = confirmed_deaths_clean_population.groupby("Country").
 
+confirmed_deaths_result = pd.DataFrame()
+for country in confirmed_deaths_clean_population["Country"].unique():
+    temp = confirmed_deaths_clean_population[confirmed_deaths_clean_population["Country"] == country]
+    temp["deaths_delta"] = ""
+    temp["confirmed_delta"] = ""
+    for i in range(0, len(temp)):
+        if i == 0:
+            temp["deaths_delta"].iloc[i] = temp["Deaths"].iloc[i]
+            temp["confirmed_delta"].iloc[i] = temp["Confirmed"].iloc[i]
+        else:
+            temp["deaths_delta"].iloc[i] = temp["Deaths"].iloc[i] - temp["Deaths"].iloc[i-1]
+            temp["confirmed_delta"].iloc[i] = temp["Confirmed"].iloc[i] - temp["Confirmed"].iloc[i-1]
+    confirmed_deaths_result = confirmed_deaths_result.append(temp)
+    print(country)
 # @st.cache used before function definition for caching of returned data
 
 # %%
 # TODO Datamanipulation: change pr day for both measures, rolling average, percentage of population, cases per 100.000 pop,  
 # TODO: Map visualization, user feedback, forecasting, 
 # TODO: Excess mortality - data?
-
+# TODO: Improve performance of delta loop
 # %%
 st.header("Choose Countries")
 
 col1, col2 = st.columns(2)
-countries_chosen_list = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+countries_chosen_total_cases = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
 value_choice = col2.radio("Deaths or confirmed cases", ["Confirmed", "Deaths"])
 
 
-countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_list)]
+countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_total_cases)]
 countries_chosen_df = countries_chosen_df.drop(columns=["Country","Confirmed"])
 countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
 c1 = px.line(countries_chosen_df, x="Date", y="Deaths", title='Test')
@@ -98,6 +116,14 @@ st.plotly_chart(c1)
 
 
 
+col1, col2 = st.columns(2)
+countries_chosen_delta_cases = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+value_choice = col2.radio("Deaths or confirmed cases", ["Confirmed", "Deaths"])
+countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_delta_cases)]
+countries_chosen_df = countries_chosen_df.drop(columns=["Country","Confirmed"])
+countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
+c1 = px.line(countries_chosen_df, x="Date", y="Deaths", title='Test')
+st.plotly_chart(c1)
 
 
 
