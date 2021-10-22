@@ -74,20 +74,34 @@ confirmed_deaths_clean = deaths_clean.join(confirmed_clean)
 
 confirmed_deaths_clean_population = pd.merge(confirmed_deaths_clean, df, on=["Country"])
 
-# TODO Datamanipulation: change pr day for both measures, rolling average, percentage of population, cases per 100.000 pop,  
 
 # @st.cache used before function definition for caching of returned data
 
 # %%
+# TODO Datamanipulation: change pr day for both measures, rolling average, percentage of population, cases per 100.000 pop,  
 # TODO: Map visualization, user feedback, forecasting, 
-
+# TODO: Excess mortality - data?
 
 # %%
 st.header("Choose Countries")
 
-#countries_chosen_list = st.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+col1, col2 = st.columns(2)
+countries_chosen_list = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
+value_choice = col2.radio("Deaths or confirmed cases", ["Confirmed", "Deaths"])
 
 
+countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_list)]
+countries_chosen_df = countries_chosen_df.drop(columns=["Country","Confirmed"])
+countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
+c1 = px.line(countries_chosen_df, x="Date", y="Deaths", title='Test')
+st.plotly_chart(c1)
+
+
+
+
+
+
+forecasting_horizon_chosen = st.slider("Forecasting horizon", 5, 100, 5)
 
 
 #countries_chosen_df["ID"] = 
@@ -95,28 +109,9 @@ st.header("Choose Countries")
 # countries_chosen_df["Date"] = pd.to_datetime(countries_chosen_df["Date"])
 
 #countries_chosen_df = countries_chosen_df.set_index("Date")
-col1, col2 = st.beta_columns(2)
-
-col1.header("Choose country")
-countries_chosen_list = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"])
-countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_list)]
-countries_chosen_df = countries_chosen_df.drop(columns=["Country","Confirmed"])
-countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
-
-col2.header("Test")
-c1 = px.line(countries_chosen_df, x="Date", y="Deaths", title='Test')
-col2.plotly_chart(c1)
 
 
 st.plotly_chart(c1)
 
-
-#df2["Deaths"] = int(df2["Deaths"])
-
-#st.line_chart(df2_test)
-
-# add together duplicatd countries
-# deaths_clean["Country/Region"][deaths_clean["Country/Region"].duplicated()].unique()
-# deaths_clean[deaths_clean["Country/Region"].duplicated()]
 
 # %%
