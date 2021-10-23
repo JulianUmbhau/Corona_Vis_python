@@ -116,22 +116,38 @@ confirmed_deaths_clean = create_delta_values(confirmed_deaths_clean_population)
 # TODO: Map visualization, user input, forecasting, 
 # TODO: Excess mortality - data?
 # TODO: Improve performance of delta loop
+
+# %%
+
+import dash
+
+
+
+
+
+
 # %%
 st.header("Choose Countries")
 
 col1, col2 = st.columns(2)
 countries_chosen_total_cases = col1.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"], key="multiselect1")
 value_choice = col2.radio("Deaths or confirmed cases", ["Confirmed", "Deaths"], key="radio1")
+
+####
+
 countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_total_cases)]
 countries_chosen_df = countries_chosen_df[["Date", value_choice]]
 countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
 c1 = px.line(countries_chosen_df, x="Date", y=value_choice, title='Cases')
 st.plotly_chart(c1)
 
+
+#### 
 col3, col4 = st.columns(2)
 countries_chosen_delta_cases = col3.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"], key="multiselect2")
 value_choice = col4.radio("Deaths or confirmed cases", ["Confirmed", "Deaths"], key="radio2")
 value_choice = value_choice.lower() + "_delta"
+
 countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(countries_chosen_total_cases)]
 countries_chosen_df = countries_chosen_df[["Date", value_choice]]
 countries_chosen_df["Date"] = countries_chosen_df["Date"].dt.strftime('%d/%m/%Y')
@@ -142,7 +158,6 @@ forecasting_horizon_chosen = st.slider("Forecasting horizon", 5, 100, 5)
 
 # %%
 # Mapbox visualization
-
 
 col5, col6 = st.columns(2)
 countries_chosen_map = col5.multiselect("Select Countries", list(confirmed_deaths_clean["Country"].unique()), default=["Denmark"], key="multiselect3")
@@ -155,7 +170,7 @@ countries_chosen_df = countries_chosen_df[countries_chosen_df["Date"] == date_ch
 
 countries_chosen_df = countries_chosen_df[countries_chosen_df["Country"] == "Denmark"]
 
-countries_chosen_df = countries_chosen_df[["Country","lat","lon", "Deaths"]]
+countries_chosen_df = countries_chosen_df[["Country","lat","lon"]]
 
 st.map(countries_chosen_df)
 
