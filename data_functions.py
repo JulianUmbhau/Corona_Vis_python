@@ -96,8 +96,8 @@ for country in confirmed_deaths_clean_population["Country"].unique():
 # @st.cache used before function definition for caching of returned data
 
 # %%
-# TODO Datamanipulation: change pr day for both measures, rolling average, percentage of population, cases per 100.000 pop,  
-# TODO: Map visualization, user feedback, forecasting, 
+# TODO Datamanipulation: rolling average, percentage of population, cases per 100.000 pop,  
+# TODO: Map visualization, user input, forecasting, 
 # TODO: Excess mortality - data?
 # TODO: Improve performance of delta loop
 # %%
