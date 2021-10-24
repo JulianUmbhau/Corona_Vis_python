@@ -122,13 +122,49 @@ confirmed_deaths_clean = create_delta_values(confirmed_deaths_clean_population)
 import dash
 import dash_leaflet as dl
 
-app = dash.Dash()
-app.layout = dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'})
+
+from dash import dcc
+import dash_html_components as html
+import plotly.express as px
+import pandas as pd
+
+app = dash.Dash(__name__)
+
+# assume you have a "long-form" data frame
+# see https://plotly.com/python/px-arguments/ for more options
+
+
+df = confirm
+fig = px.bar()
+
+
+app.layout = html.Div(children=[
+    html.H1(children='Choose Countries'),
+
+    html.Div(children='''
+        Dash: A web application framework for your data.
+    '''),
+
+    html.Div(children = "</br>"),
+
+
+
+    dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'}),
+
+])
+
+app.layout = dcc.RadioItems(
+    options=[
+        {'label': 'New York City', 'value': 'NYC'},
+        {'label': 'Montréal', 'value': 'MTL'},
+        {'label': 'San Francisco', 'value': 'SF'}
+    ],
+    value='MTL',
+    labelStyle={'display': 'inline-block'}
+)
 
 if __name__ == '__main__':
-    app.run_server() 
-
-
+    app.run_server()
 
 
 
