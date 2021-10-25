@@ -117,26 +117,34 @@ confirmed_deaths_clean = create_delta_values(confirmed_deaths_clean_population)
 # TODO: Excess mortality - data?
 # TODO: Improve performance of delta loop
 
+
+
+df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(["Denmark", "Sweden"])]
+
+fig = px.line(df, x="Date", y="Confirmed", color="Country", title='Confirmed cases')
+fig.show()
+fig.close()
+
+
 # %%
 
 import dash
 import dash_leaflet as dl
-
-
 from dash import dcc
-import dash_html_components as html
+from dash import html
+from dash.exceptions import PreventUpdate
+from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 
+confirmed_deaths_clean = confirmed_deaths_clean
+
 app = dash.Dash(__name__)
 
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-
-
-df = confirm
-fig = px.bar()
-
+options = [
+    {"label":"Confirmed", "value":"Confirmed"},
+    {"label":"Deaths", "value":"Deaths"}
+    ]
 
 app.layout = html.Div(children=[
     html.H1(children='Choose Countries'),
@@ -147,24 +155,43 @@ app.layout = html.Div(children=[
 
     html.Div(children = "</br>"),
 
+    html.Div([
+        "Choose cases to show",
+        dcc.RadioItems(
+            id="value_choice",
+            options=options,
+            value='Confirmed',
+            labelStyle={'display': 'inline-block'}
+        )
+    ]),
 
+    dcc.Graph(id="line-chart"),
 
-    dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'}),
+    dcc.Dropdown(
+    options=[
+        {'label': 'New York City', 'value': 'NYC'},
+        {'label': 'Montreal', 'value': 'MTL'},
+        {'label': 'San Francisco', 'value': 'SF'}
+    ],
+    value=['MTL', 'NYC'],
+    multi=True),
+
+    dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'})
 
 ])
 
-app.layout = dcc.RadioItems(
-    options=[
-        {'label': 'New York City', 'value': 'NYC'},
-        {'label': 'Montréal', 'value': 'MTL'},
-        {'label': 'San Francisco', 'value': 'SF'}
-    ],
-    value='MTL',
-    labelStyle={'display': 'inline-block'}
-)
+@app.callback(
+    Output("line-chart", "figure"), 
+    Input("value_choice", "value"))
+def update_line_chart(value_chosen):
+    countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(["Denmark", "Sweden"])]
+    countries_chosen_df = countries_chosen_df[["Date", value_chosen]]
+    fig = px.line(countries_chosen_df, 
+        x="Date", y=value_chosen, color='Country')
+    return fig
 
-if __name__ == '__main__':
-    app.run_server()
+#if __name__ == '__main__':
+app.run_server(debug=True)
 
 
 
