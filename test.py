@@ -67,7 +67,7 @@ def update_multi_options(search_value, value):
 def update_line_chart(value_chosen):
     countries_chosen_df = df.loc[df['Country'].isin(value_chosen)]
     #countries_chosen_df = countries_chosen_df[["year", value_chosen]]
-    fig = px.line(countries_chosen_df, x="Date", y="Confirmed")
+    fig = px.line(countries_chosen_df, x="Date", y="Confirmed", color="Country")
     return fig
 
 

@@ -137,13 +137,15 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 
-confirmed_deaths_clean = confirmed_deaths_clean
+#confirmed_deaths_clean = confirmed_deaths_clean
+
+confirmed_deaths_clean = px.data.gapminder()
 
 app = dash.Dash(__name__)
 
 options = [
-    {"label":"Confirmed", "value":"Confirmed"},
-    {"label":"Deaths", "value":"Deaths"}
+    {"label":"Life Expectancy", "value":"lifeExp"},
+    {"label":"Population", "value":"pop"}
     ]
 
 app.layout = html.Div(children=[
@@ -160,7 +162,7 @@ app.layout = html.Div(children=[
         dcc.RadioItems(
             id="value_choice",
             options=options,
-            value='Confirmed',
+            value='pop',
             labelStyle={'display': 'inline-block'}
         )
     ]),
@@ -185,9 +187,9 @@ app.layout = html.Div(children=[
     Input("value_choice", "value"))
 def update_line_chart(value_chosen):
     countries_chosen_df = confirmed_deaths_clean.loc[confirmed_deaths_clean['Country'].isin(["Denmark", "Sweden"])]
-    countries_chosen_df = countries_chosen_df[["Date", value_chosen]]
+    countries_chosen_df = countries_chosen_df[["year", value_chosen]]
     fig = px.line(countries_chosen_df, 
-        x="Date", y=value_chosen, color='Country')
+        x="year", y=value_chosen, color='country')
     return fig
 
 #if __name__ == '__main__':
