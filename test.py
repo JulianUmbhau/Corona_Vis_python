@@ -8,14 +8,11 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 
-df = px.data.gapminder()
+df = pd.read_csv("test_data.csv", low_memory=False)
 
 app = dash.Dash(__name__)
 
-options = [
-    {"label":"Sweden", "value":"Sweden"},
-    {"label":"Denmark", "value":"Denmark"}
-    ]
+options_countries = [{"label":x, "value":x} for x in df["Country"].unique()]
 
 app.layout = html.Div(children=[
     html.H1(children='Choose Countries'),
@@ -24,42 +21,55 @@ app.layout = html.Div(children=[
         Dash: A web application framework for your data.
     '''),
 
-    html.Div(children = "</br>"),
-
     html.Div([
         "Choose country to show",
         dcc.RadioItems(
             id="value_choice",
-            options=options,
+            options=options_countries,
             value='Denmark',
             labelStyle={'display': 'inline-block'}
         )
     ]),
 
-    dcc.Graph(id="line-chart"),
+    html.Div([
+        "Choose Countries to show",
+        dcc.Dropdown(
+            id="country_choice",
+            options = options_countries,
+            value=["Denmark"],
+            multi=True
+        )
+    ]),
 
-    dcc.Dropdown(
-    options=[
-        {'label': 'New York City', 'value': 'NYC'},
-        {'label': 'Montreal', 'value': 'MTL'},
-        {'label': 'San Francisco', 'value': 'SF'}
-    ],
-    value=['MTL', 'NYC'],
-    multi=True),
+    dcc.Graph(id="line-chart"),
 
     dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'})
 
 ])
 
 @app.callback(
+    Output("my-multi-dynamic-dropdown", "options"),
+    Input("my-multi-dynamic-dropdown", "search_value"),
+    State("my-multi-dynamic-dropdown", "value")
+)
+def update_multi_options(search_value, value):
+    if not search_value:
+        raise PreventUpdate
+    # Make sure that the set values are in the option list, else they will disappear
+    # from the shown select list, but still part of the `value`.
+    return [
+        o for o in options_countries if search_value in o["label"] or o["value"] in (value or [])
+    ]
+
+@app.callback(
     Output("line-chart", "figure"), 
-    Input("value_choice", "value"))
+    Input("country_choice", "value"))
 def update_line_chart(value_chosen):
-    countries_chosen_df = df.loc[df['country'].isin([value_chosen])]
+    countries_chosen_df = df.loc[df['Country'].isin(value_chosen)]
     #countries_chosen_df = countries_chosen_df[["year", value_chosen]]
-    fig = px.line(countries_chosen_df, 
-        x="year", y="pop", color='country')
+    fig = px.line(countries_chosen_df, x="Date", y="Confirmed")
     return fig
+
 
 #if __name__ == '__main__':
 app.run_server(debug=True)
