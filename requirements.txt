@@ -8,3 +8,6 @@ matplotlib
 dash
 dash_leaflet
 dash-extensions
+dash_html_components
+dash_core_components
+python-dotenv
