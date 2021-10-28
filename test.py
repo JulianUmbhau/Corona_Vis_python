@@ -11,17 +11,12 @@ import plotly.graph_objects as go
 import pandas as pd
 from dotenv import load_dotenv
 import os
-import geopandas as gpd
-
-geo_df = gpd.read_file(gpd.datasets.get_path('naturalearth_cities'))
-
 
 df = pd.read_csv("test_data.csv", low_memory=False)
 
 load_dotenv("./.env")
 mapbox_token = os.getenv("MAPBOX_TOKEN")
 
-biosfera = dlx.geojson_to_geobuf(dlx.dicts_to_geojson([dict(lat=29.015, lon=-118.271)]))
 
 #def update_map(mapbox_token):
 
@@ -35,7 +30,7 @@ map = go.Figure(go.Scattermapbox(
     text=df["Country"].unique()
 ))
 
-map.update_layout(
+map = map.update_layout(
     autosize=True,
     hovermode='closest',
     mapbox=dict(
@@ -50,6 +45,7 @@ map.update_layout(
     ),
 )
 
+# %%
 
 #map = update_map(mapbox_token)
 
@@ -120,12 +116,6 @@ app.layout = html.Div(children=[
 
     dcc.Graph(id="line_chart_delta"),
 
-    dl.Map(children=[
-        dl.TileLayer(), 
-        dl.GeoJSON(data=biosfera, format="geobuf")
-        ],  # in-memory geobuf (smaller payload than geojson)
-        style={'width': '1000px', 'height': '500px'}),
-
     dcc.Graph(figure=map)
 
 ])
@@ -159,3 +149,5 @@ def update_line_chart(country_choice_delta, value_choice_delta):
 
 #if __name__ == '__main__':
 app.run_server(debug=True)
+
+# %%
