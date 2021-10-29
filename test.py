@@ -125,9 +125,9 @@ app.layout = html.Div(children=[
     Input("country_choice_total", "value"),
     Input("value_choice_total", "value"))
 def update_line_chart(country_choice_total, value_choice_total):
-    countries_chosen_df = df.loc[df['Country'].isin(country_choice_total)]
+    countries_chosen_df_total = df.loc[df['Country'].isin(country_choice_total)]
     #countries_chosen_df = countries_chosen_df[["year", value_chosen]]
-    fig = px.line(countries_chosen_df, x="Date", y=value_choice_total, color="Country", title="Corona - Total " + value_choice_total + " Cases")
+    fig = px.line(countries_chosen_df_total, x="Date", y=value_choice_total, color="Country", title="Corona - Total " + value_choice_total + " Cases")
     return fig
 
 @app.callback(
@@ -135,14 +135,15 @@ def update_line_chart(country_choice_total, value_choice_total):
     Input("country_choice_delta", "value"),
     Input("value_choice_delta", "value"))
 def update_line_chart(country_choice_delta, value_choice_delta):
-    countries_chosen_df = df.loc[df['Country'].isin(country_choice_delta)]
+    countries_chosen_df_delta = df.loc[df['Country'].isin(country_choice_delta)]
+    print(value_choice_delta)
     if value_choice_delta=="Confirmed":
         value_choice_delta="confirmed_delta"
         value_text="Confirmed Delta"
     elif value_choice_delta=="Deaths":
         value_choice_delta="deaths_delta"
         value_text="Deaths Delta"
-    fig = px.line(countries_chosen_df, x="Date", y=value_choice_delta, color="Country", title="Corona " + value_text + " Cases")
+    fig = px.line(countries_chosen_df_delta, x="Date", y=value_choice_delta, color="Country", title="Corona " + value_text + " Cases")
     fig = fig.update_layout(yaxis_title=value_text)
     return fig
 
