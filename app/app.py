@@ -1,24 +1,37 @@
 # %%
 import dash
-import dash_leaflet as dl
-import dash_leaflet.express as dlx
 from dash import dcc
 from dash import html
-from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from dotenv import load_dotenv
 import os
+from flask import Flask
+from data_functions import get_country_data, get_corona_data, merge_data
 
-df = pd.read_csv("test_data.csv", low_memory=False)
+
+# %%
+
+country_data = get_country_data()
+
+corona_data = get_corona_data()
+
+df = merge_data(corona_data,country_data)
+
+# %%
+
+server = Flask(__name__)
+app = dash.Dash(server=server, external_stylesheets=[dbc.themes.FLATLY])
+app.title = 'Dashboard'
+
+#df = pd.read_csv("test_data.csv", low_memory=False)
 
 load_dotenv("./.env")
 mapbox_token = os.getenv("MAPBOX_TOKEN")
 
-
-#def update_map(mapbox_token):
 
 map = go.Figure(go.Scattermapbox(
     lat=df["lat"].unique(),
@@ -47,15 +60,14 @@ map = map.update_layout(
 
 # %%
 
-#map = update_map(mapbox_token)
-
-app = dash.Dash(__name__)
 
 options_countries = [{"label":x, "value":x} for x in df["Country"].unique()]
 options_values = [
     {"label":"Confirmed", "value":"Confirmed"},
     {"label":"Deaths", "value":"Deaths"}
 ]
+
+
 
 app.layout = html.Div(children=[
     html.H1(children='Choose Countries'),
@@ -92,31 +104,31 @@ app.layout = html.Div(children=[
 
         html.Br(),
 
-    html.Div([
-        "Choose value to show",
-        dcc.RadioItems(
-            id="value_choice_delta",
-            options=options_values,
-            value='Confirmed',
-            labelStyle={'display': 'inline-block'}
-        )
-    ]),
+    # html.Div([
+    #     "Choose value to show",
+    #     dcc.RadioItems(
+    #         id="value_choice_delta",
+    #         options=options_values,
+    #         value='Confirmed',
+    #         labelStyle={'display': 'inline-block'}
+    #     )
+    # ]),
 
-    html.Br(),
+    # html.Br(),
 
-    html.Div([
-        "Choose Countries to show",
-        dcc.Dropdown(
-            id="country_choice_delta",
-            options = options_countries,
-            value=["Denmark", "Sweden"],
-            multi=True
-        )
-    ]),
+    # html.Div([
+    #     "Choose Countries to show",
+    #     dcc.Dropdown(
+    #         id="country_choice_delta",
+    #         options = options_countries,
+    #         value=["Denmark", "Sweden"],
+    #         multi=True
+    #     )
+    # ]),
 
-    dcc.Graph(id="line_chart_delta"),
+    # dcc.Graph(id="line_chart_delta"),
 
-    dcc.Graph(figure=map)
+    # dcc.Graph(figure=map)
 
 ])
 
@@ -148,7 +160,7 @@ def update_line_chart(country_choice_delta, value_choice_delta):
     return fig
 
 
-#if __name__ == '__main__':
-app.run_server(debug=True)
+if __name__ == '__main__':
+    app.run_server()
 
 # %%
