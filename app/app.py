@@ -70,6 +70,7 @@ def create_world_fig(map_df, mapbox_token):
         autosize=True,
         hovermode='closest',
         mapbox= {
+            "style":"dark",
             "accesstoken": mapbox_token,
             "bearing" : 0,
             "center": {
@@ -183,6 +184,6 @@ def update_line_chart(country_choice_total, value_choice_total):
 #     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host="0.0.0.0")
 
 # %%

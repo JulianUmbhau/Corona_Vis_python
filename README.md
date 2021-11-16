@@ -9,21 +9,25 @@ unittest
 numpy
 
 
+Next steps:
+- plan jenkins stages 
+- https://www.jenkins.io/doc/book/pipeline/docker/
+- https://www.jenkins.io/doc/book/pipeline/jenkinsfile/
+- finish container prep for jenkins deployment
+- Setup deployment via jenkins
+- Find hosting 
+
 
 TODO: 
 Find package for forecasting
 - Scikit
-
-Implement as module or app
-- Documentation
-- folder setup
 
 Implement unittests
 - unittest
 
 Implement CI/CD
 - Jenkins
-- Travis
+
 
 Find hosting setup
 - 
