@@ -30,3 +30,9 @@ Find hosting setup
 
 Find hosting platform
 - free/cheap
+
+https://www.stratoscale.com/blog/devops/using-jenkins-build-deploy-python-web-applications-part-2/
+
+https://github.com/ThibaudLamothe/dash-mapbox/blob/master/scripts/create_world_fig.py
+
+https://towardsdatascience.com/how-to-create-animated-scatter-maps-with-plotly-and-dash-f10bb82d357a
